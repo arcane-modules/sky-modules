@@ -1,0 +1,25 @@
+{
+    "name": "@sky-modules/universal/behavior/machines/robot3",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "description": "robot3 state machine utilities for UI components",
+    "main": "./index.ts",
+    "types": "./index.ts",
+    "exports": {
+        ".": "./index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {
+        "robot3": "^1.2.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4"
+    },
+    "license": "MIT"
+}

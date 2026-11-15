@@ -1,0 +1,34 @@
+{
+    "name": "@sky-modules/share",
+    "type": "module",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Network sync for reactive lamps — isolated sync units with flat deltas",
+    "keywords": [
+        "sky-modules",
+        "share",
+        "network",
+        "sync",
+        "lamps",
+        "reactive"
+    ],
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {
+        "@sky-modules/define": "workspace:*",
+        "@sky-modules/reactive": "workspace:*"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4"
+    }
+}

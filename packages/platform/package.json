@@ -1,0 +1,34 @@
+{
+    "name": "@sky-modules/platform",
+    "type": "module",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Platform detection — Cirrus, Node, Browser, Deno, Bun, Electron, Tauri, Capacitor, architecture, OS and more",
+    "keywords": [
+        "platform",
+        "detection",
+        "cirrus",
+        "node",
+        "browser",
+        "tauri",
+        "capacitor",
+        "deno",
+        "bun"
+    ],
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4"
+    }
+}

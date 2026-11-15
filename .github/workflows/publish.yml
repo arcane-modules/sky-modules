@@ -1,0 +1,42 @@
+name: Publish
+
+on:
+    push:
+        tags:
+            - 'v*'
+
+jobs:
+    publish:
+        name: Publish to npm
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: pnpm
+                  registry-url: 'https://registry.npmjs.org'
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm -r typecheck
+            - run: pnpm -r test
+            - name: Publish packages
+              run: |
+                  for dir in packages/*/; do
+                      if [ -f "$dir/package.json" ]; then
+                          is_private=$(node -p "try { const p = require('$dir/package.json'); p.private === true ? 'true' : 'false' } catch(e) { 'true' }")
+                          if [ "$is_private" = "false" ]; then
+                              echo "Publishing $dir..."
+                              cd "$dir"
+                              pnpm publish --provenance --access public --no-git-checks
+                              cd - > /dev/null
+                          fi
+                      fi
+                  done
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

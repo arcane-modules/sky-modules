@@ -1,0 +1,35 @@
+{
+    "name": "@sky-modules/root",
+    "private": true,
+    "type": "module",
+    "version": "0.0.0",
+    "description": "Sky Modules monorepo",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/arcane-modules/sky-modules"
+    },
+    "scripts": {
+        "typecheck": "pnpm -r typecheck",
+        "test": "pnpm -r test",
+        "lint": "biome lint .",
+        "format": "biome format --write .",
+        "format:check": "biome format .",
+        "check": "biome check .",
+        "docs:sync": "tsx scripts/docs-sync.ts",
+        "docs:playgrounds": "tsx scripts/docs-playgrounds.ts",
+        "docs:dev": "pnpm docs:sync && pnpm docs:playgrounds && vitepress dev docs",
+        "docs:build": "pnpm docs:sync && pnpm docs:playgrounds && vitepress build docs",
+        "docs:preview": "vitepress preview docs"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.6.7",
+        "@stryker-mutator/core": "^9.6.1",
+        "@stryker-mutator/vitest-runner": "^9.6.1",
+        "tsx": "^4.22.3",
+        "typescript": "^5.9.3",
+        "vite": "^7.3.3",
+        "vitepress": "^1.6.4",
+        "vitest": "^3.2.4"
+    }
+}

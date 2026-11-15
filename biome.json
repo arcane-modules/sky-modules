@@ -1,0 +1,63 @@
+{
+    "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+    "vcs": {
+        "enabled": false
+    },
+    "files": {
+        "includes": [
+            "**/*.{ts,tsx,js,jsx,json}",
+            "!**/node_modules",
+            "!**/dist",
+            "!docs/.vitepress/cache",
+            "!docs/public"
+        ]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 120
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "semicolons": "asNeeded",
+            "trailingCommas": "es5"
+        }
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "preset": "recommended",
+            "style": {
+                "noNonNullAssertion": "off",
+                "useTemplate": "off"
+            },
+            "complexity": {
+                "useLiteralKeys": "off"
+            },
+            "suspicious": {
+                "noRedeclare": "warn",
+                "noShadowRestrictedNames": "warn",
+                "noAssignInExpressions": "warn",
+                "noControlCharactersInRegex": "warn",
+                "useIterableCallbackReturn": "warn"
+            },
+            "correctness": {
+                "noInvalidUseBeforeDeclaration": "warn",
+                "noEmptyCharacterClassInRegex": "warn",
+                "useHookAtTopLevel": "warn"
+            },
+            "a11y": {
+                "noSvgWithoutTitle": "warn"
+            }
+        }
+    },
+    "assist": {
+        "actions": {
+            "source": {
+                "organizeImports": "off"
+            }
+        }
+    }
+}

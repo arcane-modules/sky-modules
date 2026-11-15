@@ -1,0 +1,36 @@
+{
+    "name": "@sky-modules/three",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "description": "Three.js JSX renderer based on @sky-modules/jsx",
+    "keywords": [
+        "three",
+        "threejs",
+        "jsx",
+        "renderer",
+        "sky-modules"
+    ],
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "play": "vite --config playground/vite.config.ts",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "peerDependencies": {
+        "@sky-modules/jsx": "workspace:*",
+        "three": "^0.160.0"
+    },
+    "devDependencies": {
+        "@types/three": "^0.160.0",
+        "three": "^0.160.0",
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4"
+    }
+}

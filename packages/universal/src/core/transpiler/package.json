@@ -1,0 +1,34 @@
+{
+    "name": "@sky-modules/universal/transpiler",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "description": "Fusion Components — custom cross-framework component transpiler",
+    "main": "./index.ts",
+    "types": "./index.ts",
+    "exports": {
+        ".": "./index.ts",
+        "./react": "./react.ts",
+        "./solid": "./solid.ts",
+        "./vue": "./vue.ts",
+        "./svelte": "./svelte.ts",
+        "./qwik": "./qwik.ts",
+        "./angular": "./angular.ts",
+        "./lit": "./lit.ts",
+        "./types": "./types.ts"
+    },
+    "files": [
+        "src/**/*.ts",
+        "src/**/*.tsx"
+    ],
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4"
+    },
+    "license": "MIT"
+}

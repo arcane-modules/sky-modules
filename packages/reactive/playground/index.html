@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Reactive playground</title>
+        <style>
+            body { font-family: monospace; margin: 16px; }
+            label { display: block; margin-bottom: 8px; }
+            button { margin-right: 8px; }
+            pre { background: #111; color: #ddd; padding: 12px; min-height: 80px; }
+            .errors { color: #c00; min-height: 1.4em; }
+        </style>
+    </head>
+    <body>
+        <h1>@sky-modules/reactive</h1>
+        <label>health <input id="health" type="number" /></label>
+        <label>name <input id="name" type="text" /></label>
+        <div class="errors" id="errors"></div>
+        <h3>lamp.onSync deltas</h3>
+        <pre id="deltas"></pre>
+        <h3>reactiveArray</h3>
+        <button id="push">push</button>
+        <button id="pop">pop</button>
+        <button id="clear">clear</button>
+        <pre id="inventory"></pre>
+        <script type="module" src="./main.ts"></script>
+    </body>
+</html>

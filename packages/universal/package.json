@@ -1,0 +1,50 @@
+{
+    "name": "@sky-modules/universal",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "description": "Cross-framework universal components, design system, and Fusion Components transpiler",
+    "keywords": [
+        "universal",
+        "cross-framework",
+        "components",
+        "design-system",
+        "fusion-components"
+    ],
+    "license": "MIT",
+    "main": "./src/buttons/index.ts",
+    "types": "./src/buttons/index.ts",
+    "exports": {
+        ".": "./src/buttons/index.ts",
+        "./react": "./src/buttons/Button.x.tsx",
+        "./vue": "./src/buttons/Button.x.tsx",
+        "./solid": "./src/buttons/Button.x.tsx",
+        "./svelte": "./src/buttons/Button.x.tsx",
+        "./qwik": "./src/buttons/Button.x.tsx",
+        "./angular": "./src/buttons/Button.x.tsx",
+        "./lit": "./src/buttons/Button.x.tsx",
+        "./transpiler": "./src/core/transpiler/index.ts",
+        "./design-system": "./src/design-system/index.ts",
+        "./behavior/machines/robot3": "./src/behavior/machines/robot3/index.ts",
+        "./SlotRoot": "./src/SlotRoot/index.ts"
+    },
+    "files": [
+        "src/**/*.ts",
+        "src/**/*.tsx"
+    ],
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {
+        "robot3": "^1.2.0",
+        "solid-js": "^1.9.10"
+    },
+    "devDependencies": {
+        "@types/react": "^18.3.0",
+        "react": "^18.3.1",
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4"
+    }
+}
