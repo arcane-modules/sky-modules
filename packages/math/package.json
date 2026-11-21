@@ -1,0 +1,31 @@
+{
+    "name": "@sky-modules/math",
+    "type": "module",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Math of three.js 0.187.0 copied as is, usable as @sky-modules/core traits",
+    "keywords": [
+        "math",
+        "vector",
+        "matrix",
+        "quaternion",
+        "three"
+    ],
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.three.json",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@sky-modules/core": "workspace:*",
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4"
+    }
+}

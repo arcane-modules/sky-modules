@@ -9,7 +9,10 @@
             "!**/node_modules",
             "!**/dist",
             "!docs/.vitepress/cache",
-            "!docs/public"
+            "!docs/public",
+            "!packages/math/src/three/math",
+            "!packages/math/src/three/constants.*",
+            "!packages/math/src/three/utils.*"
         ]
     },
     "formatter": {

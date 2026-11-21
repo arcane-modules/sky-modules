@@ -79,6 +79,18 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(tsx@4.22.3)
 
+  packages/math:
+    devDependencies:
+      '@sky-modules/core':
+        specifier: workspace:*
+        version: link:../core
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(tsx@4.22.3)
+
   packages/migration:
     dependencies:
       '@sky-modules/define':

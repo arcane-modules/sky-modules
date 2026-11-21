@@ -1,9 +1,9 @@
-export { defineTrait, type Trait, type TraitDefinition, type TraitTypes } from './trait'
+export type { AnyTraitClass, CheckTrait, Trait, TraitApiKey, TraitInstance } from './trait'
 export {
     compose,
+    type ComposedApi,
     type ComposedClass,
     type ComposedInstance,
-    type ComposeArgs,
     type MergeShapes,
     type ShapeConflict,
 } from './compose'

@@ -1,77 +1,104 @@
 # @sky-modules/core
 
-Базовые примитивы: трейты без состояния и `compose` для типизированной множественной композиции.
+Базовые примитивы: трейты-классы и `compose` для типизированной множественной композиции.
 
-Трейт — обычный объект с методами и необязательным `init`. `compose` строит класс, в прототипе которого лежат методы всех трейтов (по одному разу), а конструктор вызывает `init` каждого трейта на одном и том же экземпляре.
+Трейт — обычный класс с API как у математики Three.js: `constructor(...args)`, `set(...args)`, `copy(other)`, `clone()`. `compose` строит базовый класс, в прототипе которого лежат методы всех трейтов (по одному разу), а также сгенерированные `copy` и `clone`. Конструктор и `set` композиции пишет пользователь.
 
 ## Быстрый старт
 
 ```ts
-import { compose, defineTrait } from '@sky-modules/core'
+import { compose } from '@sky-modules/core'
 
-interface PositionFields {
-    x: number
-    y: number
-}
+class Vector2 {
+    x!: number
+    y!: number
 
-const Position = defineTrait<'Position', PositionFields, object, [x: number, y: number]>({
-    name: 'Position',
-    init(x, y) {
+    constructor(x = 0, y = 0) {
+        this.set(x, y)
+    }
+
+    set(x: number, y: number): this {
         this.x = x
         this.y = y
-    },
-})
+        return this
+    }
 
-const Movable = defineTrait<'Movable', PositionFields, { move(dx: number, dy: number): void }, []>({
-    name: 'Movable',
-    move(dx, dy) {
+    copy(other: Vector2): this {
+        this.x = other.x
+        this.y = other.y
+        return this
+    }
+
+    clone(): this {
+        return new (this.constructor as new () => this)().copy(this)
+    }
+
+    move(dx: number, dy: number): this {
         this.x += dx
         this.y += dy
-    },
-})
+        return this
+    }
+}
 
-class Player extends compose(Position, Movable) {}
+// Size is declared the same way: width, height, area()
 
-const player = new Player({ Position: [10, 20] })
-player.move(5, 5)
+class Rect extends compose(Vector2, Size) {
+    constructor(x = 0, y = 0, width = 0, height = 0) {
+        super()
+        this.set(x, y, width, height)
+    }
+
+    set(x: number, y: number, width: number, height: number): this {
+        Vector2.prototype.set.call(this, x, y)
+        Size.prototype.set.call(this, width, height)
+        return this
+    }
+}
+
+const rect = new Rect(0, 0, 10, 20)
+rect.move(5, 5)
+const copy = rect.clone()
 ```
 
 ## API
 
-### `defineTrait<N, F, M, A>(definition)`
+### Трейт
 
-Объявляет трейт. Значение во время выполнения — сам объект определения.
+Требования, которые проверяются в типах (`CheckTrait`):
 
-| Параметр типа | Значение |
-| --- | --- |
-| `N` | Имя трейта, строковый литерал. Должно быть уникальным в рамках одного вызова `compose`. |
-| `F` | Поля, которые трейт записывает в экземпляр (обычно в `init`). |
-| `M` | Методы, которые вносит трейт. |
-| `A` | Кортеж аргументов `init`. По умолчанию `[]`. |
+- класс создаётся без аргументов: значения по умолчанию (`constructor(x = 0, y = 0)`, как в Three.js) или пустая перегрузка `constructor()`;
+- класс создаётся с аргументами `set`. Если `set` принимает объединение кортежей (`[color] | [r, g, b]`), конструктор должен принимать каждый из них;
+- `copy(other): this`;
+- `clone(): this`.
 
-Внутри методов и `init` тип `this` — `F & M`.
+Соглашения, которые типами не проверяются:
 
-Имена `name` и `init` зарезервированы и не копируются в прототип.
+- конструктор выделяет вложенное состояние (массивы, вложенные векторы, колбэки) и вызывает `set`; `set` только присваивает;
+- `copy` присваивает поля напрямую, а не через `this.set`: внутри композиции `this.set` принадлежит композиции.
+
+Тип `Trait<A, I>` описывает класс трейта: `new (): I` и `new (...args: A): I`.
 
 ### `compose(...traits)`
 
-Возвращает конструктор класса. Тип экземпляра — объединение полей и методов всех трейтов.
+Возвращает базовый класс, который создаётся без аргументов. Каждый аргумент проверяется на API трейта.
 
-Конструктор принимает один необязательный объект, где ключ — имя трейта, а значение — кортеж аргументов его `init`:
+Базовый конструктор для каждого трейта выполняет `Object.assign(this, new Trait())`. Поэтому вложенное состояние, например `Matrix4.elements` или `Box3.min`/`max`, уже существует, когда вызывается `set` пользователя. Цена — один временный объект на трейт при каждом создании. Поля `#private` так не переносятся.
 
-```ts
-new Player({ Position: [10, 20] })
-```
-
-Аргумент становится обязательным, как только у какого-либо трейта `A` не пуст.
+- Тип экземпляра — объединение экземпляров трейтов без `set`, `copy`, `clone`, плюс `copy(other: this): this` и `clone(): this`.
+- `copy` вызывает `copy` каждого трейта в порядке списка и возвращает `this`.
+- `clone` возвращает `new this.constructor().copy(this)`.
+- Методы, геттеры и сеттеры трейта собираются по цепочке прототипов (до `Object.prototype`). `constructor`, `set`, `copy`, `clone` не переносятся.
+- Конструктор и `set` пишет пользователь. В `set` нужно вручную вызвать `Trait.prototype.set.call(this, …)` каждого трейта.
+- Композиция с собственными `constructor` и `set` сама является трейтом и может передаваться в другой `compose`.
 
 Правила:
 
 - Один и тот же трейт, переданный дважды, применяется один раз.
-- Два **разных** трейта с одинаковым именем выбрасывают ошибку во время выполнения: `compose: two different traits share the name "X"`.
-- Два трейта с одним и тем же методом, но разными реализациями выбрасывают ошибку: `compose: method "run" is defined by both "A" and "B"`.
-- Один и тот же ключ поля или метода с разными типами отклоняется на этапе компиляции (`ShapeConflict`).
+- Если у двух трейтов член с одним именем реализован по-разному, во время выполнения будет ошибка `compose: member "move" is defined by both "A" and "B"`.
+- Если у двух трейтов поле или метод с одним именем имеет разные типы, `compose` отклоняется на этапе компиляции (`ShapeConflict`).
+
+Ограничение: тип `this` в методах трейта после объединения фиксируется на классе трейта. Например, `move()` у `Rect` возвращает `Vector2`.
 
 ### Экспортируемые типы
 
-`Trait`, `TraitDefinition`, `TraitTypes`, `ComposedClass`, `ComposedInstance`, `ComposeArgs`, `MergeShapes`, `ShapeConflict`.
+`Trait`, `TraitInstance`, `TraitApiKey`, `AnyTraitClass`, `CheckTrait`, `ComposedApi`, `ComposedClass`, `ComposedInstance`, `MergeShapes`, `ShapeConflict`.

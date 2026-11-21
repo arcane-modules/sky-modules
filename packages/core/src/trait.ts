@@ -1,44 +1,61 @@
 /**
- * Type-only marker that carries trait type parameters.
- * Never created at runtime.
+ * Instance API every trait must provide.
+ * `set` takes the constructor arguments and only assigns fields.
  */
-export declare const TRAIT_TYPES: unique symbol
-
-export interface TraitTypes<N extends string, F extends object, M extends object, A extends unknown[]> {
-    readonly name: N
-    readonly fields: F
-    readonly methods: M
-    readonly args: A
+export interface TraitInstance<A extends unknown[]> {
+    set(...args: A): this
+    copy(other: this): this
+    clone(): this
 }
 
 /**
- * Stateless trait value: methods plus optional `init` that receives the same `this`.
+ * Trait is a plain class: `constructor(...args)`, `set(...args)`, `copy(other)`, `clone()`.
+ * It must be constructible without arguments (default values or an empty overload):
+ * the constructor allocates nested state, `set` only assigns.
  */
-export type Trait<
-    N extends string = string,
-    F extends object = object,
-    M extends object = object,
-    A extends unknown[] = unknown[],
-> = Readonly<M> & {
-    readonly name: N
-    init?(this: F, ...args: A): void
-    readonly [TRAIT_TYPES]?: TraitTypes<N, F, M, A>
+export interface Trait<A extends unknown[], I extends TraitInstance<A> = TraitInstance<A>> {
+    new (): I
+    new (...args: A): I
+    readonly prototype: I
 }
 
-/**
- * Definition accepted by `defineTrait`. Methods and `init` see `this` as `F & M`.
- */
-export type TraitDefinition<N extends string, F extends object, M extends object, A extends unknown[]> = M & {
-    readonly name: N
-    init?(this: F, ...args: A): void
-} & ThisType<F & M>
+/** Keys of the trait API; never merged into a composition. */
+export type TraitApiKey = 'set' | 'copy' | 'clone'
+
+/** Widest class shape accepted before the exact trait check. */
+export type AnyTraitClass = new (...args: never[]) => object
+
+/** `true` when both types are mutually assignable. */
+export type IsSame<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false
 
 /**
- * Declares a trait with explicit type parameters.
- * Runtime value is the definition object itself.
+ * `true` when the constructor accepts every tuple of `S`.
+ * Distributes over a union of tuples, e.g. `set(...args: [color] | [r, g, b])`.
  */
-export function defineTrait<N extends string, F extends object, M extends object, A extends unknown[] = []>(
-    definition: TraitDefinition<N, F, M, A>
-): Trait<N, F, M, A> {
-    return definition
-}
+type AcceptsArgs<T, I, S> = false extends (
+    S extends unknown[]
+        ? T extends new (
+              ...args: S
+          ) => I
+            ? true
+            : false
+        : never
+)
+    ? false
+    : true
+
+/**
+ * Resolves to `T` when the class satisfies the trait API, otherwise `never`.
+ * The class must be constructible both without arguments and with the arguments of `set`.
+ */
+export type CheckTrait<T> = T extends new (
+    ...args: never[]
+) => infer I
+    ? I extends { set(...args: infer S): I; copy(other: I): I; clone(): I }
+        ? T extends new () => I
+            ? AcceptsArgs<T, I, S> extends true
+                ? T
+                : never
+            : never
+        : never
+    : never
