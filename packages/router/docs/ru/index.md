@@ -27,7 +27,7 @@ router.navigate('/users/123')
 ```ts
 interface Route {
     path: string // '/users/:id'
-    Component: JSX.FC | (() => Promise<JSX.FC>) // компонент или ленивый загрузчик
+    Component: RouteComponent | (() => Promise<RouteComponent>) // компонент или ленивый загрузчик
 }
 ```
 

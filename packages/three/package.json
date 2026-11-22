@@ -25,11 +25,13 @@
     },
     "peerDependencies": {
         "@sky-modules/jsx": "workspace:*",
-        "three": "^0.160.0"
+        "three": "^0.187.0",
+        "solid-js": "^2.0.3"
     },
     "devDependencies": {
-        "@types/three": "^0.160.0",
-        "three": "^0.160.0",
+        "@types/three": "^0.187.0",
+        "solid-js": "^2.0.3",
+        "three": "^0.187.0",
         "typescript": "^5.9.3",
         "vitest": "^3.2.4"
     }

@@ -6,7 +6,7 @@
  * @module
  */
 
-import type { JSX } from 'solid-js'
+import type { JSX } from '@solidjs/web'
 
 import { SlotRootContext, type SlotRootContextType } from './SlotRoot.context'
 
@@ -45,5 +45,6 @@ export default function SlotRootProvider(props: SlotRootProviderProps): JSX.Elem
         },
     }
 
-    return <SlotRootContext.Provider value={value}>{props.children}</SlotRootContext.Provider>
+    // Solid 2: the context itself is the provider component
+    return <SlotRootContext value={value}>{props.children}</SlotRootContext>
 }

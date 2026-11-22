@@ -1,6 +1,6 @@
 # @sky-modules/reactive
 
-Fine-grained reactivity for schema classes. Importing the package registers a property descriptor hook in `@sky-modules/define`, so the decorators from `@sky-modules/schema` create properties backed by SolidJS signals. It adds chainable validation, change tracking (`SignalLamp`) and reactive arrays.
+Fine-grained reactivity for schema classes. Importing the package registers a property descriptor hook in `@sky-modules/define`, so the decorators from `@sky-modules/schema` create properties backed by Solid 2 signals. A value written to a property is readable immediately; subscribed effects are notified in Solid batches (after a microtask or `flush()`), and writes from inside effects are allowed. It adds chainable validation, change tracking (`SignalLamp`) and reactive arrays.
 
 ## Quick start
 
@@ -76,7 +76,7 @@ Changes made in the same tick are batched into one callback through a microtask.
 
 ## signal
 
-`signal(initial)` returns a proxy where each property is a SolidJS signal. `getRawValue(proxy)` returns raw data and `isSignal(value)` checks for such a proxy.
+`signal(initial)` returns a proxy where each property is reactive (Solid 2 signals, same read-after-write semantics). `getRawValue(proxy)` returns raw data and `isSignal(value)` checks for such a proxy.
 
 ## reactiveArray
 

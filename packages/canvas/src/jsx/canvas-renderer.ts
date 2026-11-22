@@ -1,12 +1,11 @@
 /**
  * JSX renderer for 2D canvas.
  *
- * Maps JSX elements to canvas scene graph objects.
+ * Maps element descriptions (`{ type, props }`) to canvas scene graph objects.
  *
  * @module
  */
 
-import type { JSX } from '@sky-modules/jsx'
 import { Mesh } from '../core/Mesh'
 import { Group } from '../core/Group'
 import { RectGeometry } from '../geometries/RectGeometry'
@@ -15,9 +14,22 @@ import { BasicMaterial } from '../materials/BasicMaterial'
 import { FillStrokeMaterial } from '../materials/FillStrokeMaterial'
 
 /**
- * JSX node for canvas renderer.
+ * Component that returns a canvas element description.
  */
-export type CanvasJSXNode = JSX.Element | CanvasJSXNode[] | null | undefined
+export type CanvasComponent = (props: Record<string, unknown>) => CanvasJSXNode
+
+/**
+ * Element description: an intrinsic tag (`rect`, `circle`, `group`) or a component, plus props.
+ */
+export interface CanvasElement {
+    type: string | CanvasComponent
+    props: Record<string, unknown>
+}
+
+/**
+ * Node accepted by the canvas renderer.
+ */
+export type CanvasJSXNode = CanvasElement | CanvasJSXNode[] | null | undefined
 
 /**
  * Create a canvas object from JSX element.
@@ -29,11 +41,11 @@ export type CanvasJSXNode = JSX.Element | CanvasJSXNode[] | null | undefined
 export function createCanvasObject(element: CanvasJSXNode): unknown {
     if (!element || Array.isArray(element)) return null
 
-    const { type, props } = element as JSX.Element & { props: Record<string, unknown> }
+    const { type, props } = element
     const children = (props.children ?? []) as CanvasJSXNode[]
 
     if (typeof type === 'function') {
-        return createCanvasObject((type as (props: Record<string, unknown>) => JSX.Element)(props))
+        return createCanvasObject(type(props))
     }
 
     let object: Mesh | Group | null = null

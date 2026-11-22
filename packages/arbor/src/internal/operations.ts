@@ -176,14 +176,15 @@ export function processCommit(tree: ArborTree & Record<string, unknown>): void {
             }
         }
 
-        // Init contexts from parent if available
-        if (operation.parent._contexts) {
-            operation.child.__initContexts()
-        }
-
+        // Register the parent before resolving contexts: __initContexts reads __parents
         const childParents = operation.child.__parents as ArborBase[]
         if (childParents.indexOf(operation.parent) === -1) {
             childParents.push(operation.parent)
+        }
+
+        // Init contexts from parent if available
+        if (operation.parent._contexts) {
+            operation.child.__initContexts()
         }
     }
 

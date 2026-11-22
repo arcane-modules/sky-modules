@@ -1,14 +1,23 @@
-import { runDemos } from './model'
+import { flush } from '@sky-modules/jsx'
+import { createCounterDemo, dump } from './model'
 
-const container = document.getElementById('demos')
-if (!container) throw new Error('Missing element #demos')
-
-for (const demo of runDemos()) {
-    const title = document.createElement('h3')
-    title.textContent = demo.title
-
-    const output = document.createElement('pre')
-    output.textContent = demo.output
-
-    container.append(title, output)
+function requireElement<T extends HTMLElement>(id: string): T {
+    const element = document.getElementById(id)
+    if (!element) throw new Error(`Missing element #${id}`)
+    return element as T
 }
+
+const output = requireElement<HTMLPreElement>('tree')
+const demo = createCounterDemo()
+
+function show(): void {
+    flush()
+    output.textContent = demo.root.children.map((child) => dump(child)).join('\n')
+}
+
+requireElement<HTMLButtonElement>('increment').addEventListener('click', () => {
+    demo.increment()
+    show()
+})
+
+show()

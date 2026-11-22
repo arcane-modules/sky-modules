@@ -62,7 +62,7 @@ A material implements `apply(ctx)`.
 
 ## JSX
 
-`createCanvasObject(element)` converts a JSX element into scene objects and returns `null` for unknown tags.
+`createCanvasObject(element)` converts an element description `{ type, props }` (`CanvasElement`: a tag `rect`/`circle`/`group` or a component) into scene objects and returns `null` for unknown tags. It does not use the Solid renderer of `@sky-modules/jsx`.
 
 | Tag | Props |
 | --- | --- |
@@ -74,7 +74,7 @@ All tags also accept `x`, `y`, `rotation`, `scaleX`, `scaleY`, `visible` and nes
 
 ## Types
 
-`CanvasRendererParameters`, `Transform2D`, `Geometry`, `Material`, `RectGeometryParameters`, `CircleGeometryParameters`, `BasicMaterialParameters`, `FillStrokeMaterialParameters`, `CanvasJSXNode`.
+`CanvasRendererParameters`, `Transform2D`, `Geometry`, `Material`, `RectGeometryParameters`, `CircleGeometryParameters`, `BasicMaterialParameters`, `FillStrokeMaterialParameters`, `CanvasElement`, `CanvasComponent`, `CanvasJSXNode`.
 
 ## Playground
 

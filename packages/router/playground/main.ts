@@ -1,5 +1,4 @@
-import type { JSX } from '@sky-modules/jsx'
-import { type Route, type RouteMatch, UniversalRouter } from '@sky-modules/router'
+import { type Route, type RouteComponent, type RouteMatch, UniversalRouter } from '@sky-modules/router'
 
 function requireElement<T extends HTMLElement>(id: string): T {
     const element = document.getElementById(id)
@@ -11,8 +10,8 @@ function requireElement<T extends HTMLElement>(id: string): T {
 const base = window.location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '')
 window.history.replaceState({}, '', `${base}/`)
 
-function page(text: string): JSX.FC {
-    return () => ({ type: 'page', props: { children: text } })
+function page(text: string): RouteComponent {
+    return () => text
 }
 
 const routes: Route[] = [

@@ -27,7 +27,7 @@ router.navigate('/users/123')
 ```ts
 interface Route {
     path: string // '/users/:id'
-    Component: JSX.FC | (() => Promise<JSX.FC>) // component or lazy loader
+    Component: RouteComponent | (() => Promise<RouteComponent>) // component or lazy loader
 }
 ```
 

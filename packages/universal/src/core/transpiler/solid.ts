@@ -21,7 +21,7 @@ export class SolidGenerator implements Generator {
     ): TranspileResult {
         const jsx = jsxNodes.map((node) => node.raw).join('\n')
 
-        const code = `import { JSX } from 'solid-js'
+        const code = `import type { JSX } from '@solidjs/web'
 
 export default function ${componentName}(props: any): JSX.Element {
   return (

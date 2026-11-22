@@ -26,9 +26,9 @@
         "test:watch": "vitest"
     },
     "dependencies": {
-        "solid-js": "^1.9.10",
+        "@sky-modules/define": "workspace:*",
         "@sky-modules/schema": "workspace:*",
-        "@sky-modules/define": "workspace:*"
+        "solid-js": "^2.0.3"
     },
     "devDependencies": {
         "typescript": "^5.9.3",

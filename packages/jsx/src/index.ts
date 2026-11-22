@@ -1,84 +1,29 @@
-import type { ElementType } from './element-type'
-
 /**
- * @sky-modules/jsx
+ * @sky-modules/jsx — Solid 2 universal renderer for any scene graph.
  *
- * Universal JSX runtime based on SolidJS.
- *
- * Re-exports SolidJS primitives and provides JSX types
- * for cross-framework components.
+ * JSX is compiled by `@solidjs/compiler` (see `@sky-modules/jsx/vite`) into calls
+ * of the renderer functions exported here.
  *
  * @module
  */
 
 export * from 'solid-js'
-export type { ElementType }
 
-// JSX runtime
-export { jsx, jsxs } from './jsx-runtime'
-export { jsxDEV } from './jsx-dev-runtime'
-
-// Universal renderer primitives
+export type { IntrinsicProps, JSX, JSXRef } from './jsx-runtime'
+export { createNode, defineElement, type JSXElementFactory, JSXElementNode, type JSXNode, JSXTextNode } from './nodes'
+// Explicit exports take precedence over same-named `solid-js` star exports
 export {
+    applyRef,
+    createComponent,
     createElement,
     createTextNode,
-    render,
     effect,
-    memo,
     insert,
-    spread,
-    setProp,
+    insertNode,
+    memo,
     mergeProps,
-    createComponent,
-} from './jsx-universal'
-
-/**
- * Fragment element type for grouping multiple JSX elements.
- *
- * @global
- */
-export const Fragment = 'Fragment'
-
-/**
- * JSX namespace for TypeScript type checking.
- *
- * @global
- */
-export namespace JSX {
-    /** Function component type. */
-    export type FC<P = Record<string, unknown>> = (props: P) => JSX.Element
-
-    /** Text node structure. */
-    export interface TextNode {
-        type: 'text'
-        value: string
-    }
-
-    /** JSX element structure. */
-    export interface Element {
-        type: ElementType
-        props: object
-        children?: Node
-    }
-
-    /** Valid children types in JSX. */
-    export type Node = Element | TextNode | Node[] | string | number | boolean | null | undefined
-
-    /** Intrinsic elements (lowercase tags). */
-    export interface IntrinsicElements extends Record<string, Record<string, unknown>> {}
-
-    /** Any class can be used as JSX element class. */
-    export type ElementClass = object
-
-    /** Props are accessed via 'props' property or constructor argument. */
-    export interface ElementAttributesProperty {
-        props: Record<string, unknown>
-    }
-
-    /** Children prop name. */
-    export interface ElementChildrenAttribute {
-        children: Record<string, unknown>
-    }
-}
-
-export default JSX
+    ref,
+    render,
+    setProp,
+    spread,
+} from './renderer'

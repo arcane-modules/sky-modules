@@ -124,6 +124,41 @@ describe('Contexts', () => {
         expect(child.context(UserSession).token).toBe('token-123')
     })
 
+    it('should propagate a host context to children created in the same commit', async () => {
+        const setup = vi.fn()
+        const cleanup = vi.fn()
+
+        class Stage {
+            static context = true as const
+            node: ArborNode
+            constructor() {
+                this.node = new ArborNode(tree, this)
+            }
+        }
+
+        class Actor {
+            node: ArborNode
+            constructor(parent: ArborNode) {
+                this.node = new ArborNode(parent, this)
+            }
+            onStageContext(stage: Stage): () => void {
+                setup(stage)
+                return cleanup
+            }
+        }
+
+        const stage = new Stage()
+        const actor = new Actor(stage.node)
+        tree.commit()
+
+        expect(actor.node.context(Stage as unknown as ArborContextClass)).toBe(stage)
+        expect(setup).toHaveBeenCalledWith(stage)
+
+        await stage.node.dispose()
+
+        expect(cleanup).toHaveBeenCalledOnce()
+    })
+
     it('should support addContext on node (not root)', () => {
         const child = new ArborNode(tree)
         tree.commit()

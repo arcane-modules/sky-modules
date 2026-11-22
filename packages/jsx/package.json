@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "type": "module",
     "private": true,
-    "description": "Universal JSX runtime based on SolidJS for cross-framework components",
+    "description": "Solid 2 universal renderer: reactive JSX for any scene graph",
     "keywords": [
         "jsx",
         "jsx-runtime",
@@ -18,7 +18,7 @@
         ".": "./src/index.ts",
         "./jsx-runtime": "./src/jsx-runtime.ts",
         "./jsx-dev-runtime": "./src/jsx-dev-runtime.ts",
-        "./jsx-universal": "./src/jsx-universal.ts"
+        "./vite": "./src/vite.ts"
     },
     "scripts": {
         "typecheck": "tsc --noEmit",
@@ -27,10 +27,15 @@
         "test:watch": "vitest"
     },
     "peerDependencies": {
-        "solid-js": "^1.9.10"
+        "solid-js": "^2.0.3"
     },
     "devDependencies": {
+        "solid-js": "^2.0.3",
         "typescript": "^5.9.3",
         "vitest": "^3.2.4"
+    },
+    "dependencies": {
+        "@solidjs/compiler": "2.0.2",
+        "@solidjs/universal": "2.0.3"
     }
 }

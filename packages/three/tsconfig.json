@@ -2,7 +2,7 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "jsx": "preserve",
-        "jsxImportSource": "solid-js",
+        "jsxImportSource": "@sky-modules/jsx",
         "types": ["vitest/globals"]
     },
     "include": ["src/**/*"],

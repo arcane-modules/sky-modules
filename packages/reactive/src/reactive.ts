@@ -13,8 +13,7 @@
  * - Raw setters (set without listener notification)
  */
 
-import { createSignal } from 'solid-js'
-
+import { createCell, type ReactiveCell } from './internal/cell'
 import { idSymbol, modifierSymbol, rawSetterSymbol, typeSymbol, CHANGE_LISTENER } from './internal/symbols'
 
 import { registerPropertyDescriptorHook } from '@sky-modules/define'
@@ -37,9 +36,9 @@ export const modifierStorageSymbol = Symbol('modifierStorage')
 
 /**
  * @global
- * Storage map: property key → SolidJS signal.
+ * Storage map: property key → reactive cell.
  */
-type SignalStorage = Map<PropertyKey, ReturnType<typeof createSignal<unknown>>>
+type SignalStorage = Map<PropertyKey, ReactiveCell>
 
 /**
  * @global
@@ -99,16 +98,13 @@ export function unwrapType<T>(schema: T): { type: unknown; modifier: Modifier } 
 
 /**
  * @global
- * Get or create a signal for a property on an object instance.
+ * Get or create a reactive cell for a property on an object instance.
  *
  * @param instance - Object instance.
  * @param key - Property key.
- * @returns Signal for property.
+ * @returns Cell for property.
  */
-function getOrCreateSignal(
-    instance: Record<symbol, unknown>,
-    key: PropertyKey
-): ReturnType<typeof createSignal<unknown>> {
+function getOrCreateCell(instance: Record<symbol, unknown>, key: PropertyKey): ReactiveCell {
     let storage = instance[signalStorageSymbol] as SignalStorage | undefined
 
     if (!storage) {
@@ -116,22 +112,21 @@ function getOrCreateSignal(
         instance[signalStorageSymbol] = storage
     }
 
-    let signal = storage.get(key)
+    let cell = storage.get(key)
 
-    if (!signal) {
-        signal = createSignal<unknown>(undefined)
-        storage.set(key, signal)
+    if (!cell) {
+        cell = createCell(undefined)
+        storage.set(key, cell)
 
         // Register raw setter
         if (!instance[rawSetterSymbol]) {
             instance[rawSetterSymbol] = {}
         }
 
-        const [, setter] = signal
-        ;(instance[rawSetterSymbol] as Record<PropertyKey, (value: unknown) => void>)[key] = setter
+        ;(instance[rawSetterSymbol] as Record<PropertyKey, (value: unknown) => void>)[key] = cell.write
     }
 
-    return signal
+    return cell
 }
 
 /**
@@ -144,21 +139,14 @@ function getRaw(instance: Record<symbol, unknown>, key: PropertyKey): unknown {
         return undefined
     }
 
-    const signal = storage.get(key)
-
-    if (!signal) {
-        return undefined
-    }
-
-    return signal[0]()
+    return storage.get(key)?.peek()
 }
 
 /**
  * Set a value on a signal without going through setter logic.
  */
 function setRaw(instance: Record<symbol, unknown>, key: PropertyKey, value: unknown): void {
-    const signal = getOrCreateSignal(instance, key)
-    signal[1](value)
+    getOrCreateCell(instance, key).write(value)
 }
 
 // ─── Property Descriptor ──────────────────────────────────────────
@@ -174,8 +162,7 @@ export function reactivePropertyDescriptor<T>(wrappedSchema: T, key: PropertyKey
     const { type: schema, modifier } = unwrapType(wrappedSchema)
 
     function getter(this: Record<symbol, unknown>): unknown {
-        const signal = getOrCreateSignal(this, key)
-        return signal[0]() // getter
+        return getOrCreateCell(this, key).read()
     }
 
     function setter(this: Record<symbol, unknown>, value: unknown): void {
@@ -189,9 +176,8 @@ export function reactivePropertyDescriptor<T>(wrappedSchema: T, key: PropertyKey
 
         modStorage[key] = modifier
 
-        // Set the signal value
-        const signal = getOrCreateSignal(this, key)
-        signal[1](value)
+        // Set the cell value
+        getOrCreateCell(this, key).write(value)
 
         // Notify change listener (used by SignalLamp)
         const listener = this[CHANGE_LISTENER] as

@@ -30,14 +30,13 @@ function notifyChangeListener(
  * @global
  * Reactive signal wrapper — creates a reactive proxy object backed by SolidJS signals.
  *
- * Each property gets its own `createSignal`. When a property is set, the signal
+ * Each property gets its own reactive cell. When a property is set, the cell
  * updates and registered change listeners are notified.
  *
  * This is the foundation for SignalLamp state management.
  */
 
-import { createSignal } from 'solid-js'
-
+import { createCell, type ReactiveCell } from '../internal/cell'
 import { CHANGE_LISTENER } from '../internal/symbols'
 
 /**
@@ -53,7 +52,7 @@ const signalProxies = new WeakSet<object>()
 /**
  * Type for the signal store map
  */
-type SignalStore = Map<string, ReturnType<typeof createSignal<unknown>>>
+type SignalStore = Map<string, ReactiveCell>
 
 /**
  * @global
@@ -123,7 +122,7 @@ export function signal<T extends Record<string, unknown>>(initial: T): T {
 
     // Initialize signals for each property
     for (const key of Object.keys(initial)) {
-        store.set(key, createSignal<unknown>(toStoreValue(initial[key])))
+        store.set(key, createCell(toStoreValue(initial[key])))
     }
 
     let changeListener:
@@ -141,10 +140,9 @@ export function signal<T extends Record<string, unknown>>(initial: T): T {
             }
 
             const keyStr = typeof key === 'string' ? key : String(key)
-            const signal = store.get(keyStr)
-            if (signal !== undefined) {
-                const [getter] = signal
-                return getter()
+            const cell = store.get(keyStr)
+            if (cell !== undefined) {
+                return cell.read()
             }
 
             return Reflect.get(target, key)
@@ -155,9 +153,8 @@ export function signal<T extends Record<string, unknown>>(initial: T): T {
                 const newListener = value as typeof changeListener
                 changeListener = newListener
                 // Propagate to all nested signal proxies in the store
-                for (const [propKey, signal] of store) {
-                    const [getter] = signal
-                    const currentValue = getter()
+                for (const [propKey, cell] of store) {
+                    const currentValue = cell.read()
                     if (currentValue && typeof currentValue === 'object' && signalProxies.has(currentValue)) {
                         const capturedKey = propKey
                         ;(currentValue as Record<symbol, unknown>)[CHANGE_LISTENER] = (
@@ -165,9 +162,9 @@ export function signal<T extends Record<string, unknown>>(initial: T): T {
                             _nestedValue: unknown,
                             _nestedRawValue: unknown
                         ) => {
-                            const parentSignal = store.get(capturedKey)
-                            if (parentSignal) {
-                                const cv = parentSignal[0]()
+                            const parentCell = store.get(capturedKey)
+                            if (parentCell) {
+                                const cv = parentCell.read()
                                 const rv = toRawValue(cv)
                                 notifyChangeListener(changeListener, capturedKey, rv, rv)
                             }
@@ -178,11 +175,10 @@ export function signal<T extends Record<string, unknown>>(initial: T): T {
             }
 
             const keyStr = typeof key === 'string' ? key : String(key)
-            const signal = store.get(keyStr)
-            if (signal !== undefined) {
+            const cell = store.get(keyStr)
+            if (cell !== undefined) {
                 const storedValue = toStoreValue(value)
-                const [, setter] = signal
-                setter(storedValue)
+                cell.write(storedValue)
 
                 // Propagate change listener to nested signal proxies
                 if (storedValue && typeof storedValue === 'object' && signalProxies.has(storedValue)) {
@@ -192,9 +188,9 @@ export function signal<T extends Record<string, unknown>>(initial: T): T {
                         _nestedRawValue: unknown
                     ) => {
                         // Re-serialize the parent value to include nested changes
-                        const parentSignal = store.get(keyStr)
-                        if (parentSignal) {
-                            const currentValue = parentSignal[0]()
+                        const parentCell = store.get(keyStr)
+                        if (parentCell) {
+                            const currentValue = parentCell.read()
                             const rawValue = toRawValue(currentValue)
                             notifyChangeListener(changeListener, keyStr, rawValue, rawValue)
                         }
@@ -224,8 +220,7 @@ export function signal<T extends Record<string, unknown>>(initial: T): T {
         getOwnPropertyDescriptor(_target: T, key: PropertyKey): PropertyDescriptor | undefined {
             const keyStr = typeof key === 'string' ? key : String(key)
             if (store.has(keyStr)) {
-                const signal = store.get(keyStr)
-                const value = signal ? signal[0]() : undefined
+                const value = store.get(keyStr)?.read()
                 return {
                     enumerable: true,
                     configurable: true,

@@ -7,4 +7,4 @@
  */
 
 export { createCanvasObject } from './canvas-renderer'
-export type { CanvasJSXNode } from './canvas-renderer'
+export type { CanvasComponent, CanvasElement, CanvasJSXNode } from './canvas-renderer'

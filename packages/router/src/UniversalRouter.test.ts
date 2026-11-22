@@ -5,12 +5,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { UniversalRouter, createRoutesFromScreens, type Route } from './UniversalRouter'
-import type { JSX } from '@sky-modules/jsx'
+import type { RouteComponent } from './UniversalRouter'
 
-const HomeComponent: JSX.FC = () => ({ type: 'div', props: { children: 'Home' } })
-const AboutComponent: JSX.FC = () => ({ type: 'div', props: { children: 'About' } })
-const UserComponent: JSX.FC = () => ({ type: 'div', props: { children: 'User' } })
-const NotFoundComponent: JSX.FC = () => ({ type: 'div', props: { children: 'Not Found' } })
+const HomeComponent: RouteComponent = () => 'Home'
+const AboutComponent: RouteComponent = () => 'About'
+const UserComponent: RouteComponent = () => 'User'
+const NotFoundComponent: RouteComponent = () => 'Not Found'
 
 describe('UniversalRouter', () => {
     let mockWindow: typeof window

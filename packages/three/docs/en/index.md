@@ -1,62 +1,64 @@
 # @sky-modules/three
 
-A Three.js renderer driven by JSX-like element objects. Peer dependencies: `@sky-modules/jsx` and `three` (^0.160).
+three.js nodes for the Solid 2 renderer of `@sky-modules/jsx`: the scene is described with JSX, and a signal change updates one object property without rebuilding the scene.
+
+Peer dependencies: `@sky-modules/jsx`, `solid-js@2`, `three@^0.187`. JSX compilation from `@sky-modules/jsx` is required (the `solidUniversal` plugin and `jsxImportSource`).
 
 ## Quick start
 
-```ts
-import { ThreeJSXRenderer } from '@sky-modules/three'
+```tsx
+import { createSignal } from '@sky-modules/jsx'
+import { mountThree } from '@sky-modules/three'
+import { Scene } from 'three'
 
-const renderer = new ThreeJSXRenderer(document.getElementById('app')!)
+const scene = new Scene()
+const [angle, setAngle] = createSignal(0)
 
-renderer.render({
-    type: 'scene',
-    props: { background: 0x111111 },
-    children: [
-        { type: 'ambientLight', props: { intensity: 0.6 } },
-        { type: 'directionalLight', props: { position: [3, 5, 2] } },
-        {
-            type: 'mesh',
-            props: { position: [0, 0, 0] },
-            children: [
-                { type: 'boxGeometry', props: { args: [1, 1, 1] } },
-                { type: 'meshStandardMaterial', props: { color: 0x00ff00 } },
-            ],
-        },
-    ],
-})
+const dispose = mountThree(
+    () => (
+        <mesh rotation={[0, angle(), 0]}>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshStandardMaterial color={0x3b82f6} roughness={0.4} />
+        </mesh>
+    ),
+    scene
+)
+
+setAngle(Math.PI / 4) // applied on the next microtask or flush()
 ```
 
-## `ThreeJSXRenderer`
+Importing the package registers the tags through `defineElement`.
 
-| Member | Description |
+## `mountThree(view, parent)`
+
+Renders JSX into an existing `Object3D` (a scene or a group) and returns `dispose`. The camera, renderer and frame loop stay with the application.
+
+## Tags
+
+- Objects: `group`, `mesh`, `line`, `lineLoop`, `lineSegments`, `points`, `ambientLight`, `directionalLight`, `pointLight`, `spotLight`, `hemisphereLight`.
+- Geometries: `bufferGeometry`, `boxGeometry`, `sphereGeometry`, `cylinderGeometry`, `coneGeometry`, `capsuleGeometry`, `torusGeometry`, `ringGeometry`, `planeGeometry`, `circleGeometry`, `icosahedronGeometry`, `dodecahedronGeometry`, `edgesGeometry`, `shapeGeometry`.
+- Materials: `meshBasicMaterial`, `meshStandardMaterial`, `meshPhysicalMaterial`, `lineBasicMaterial`, `pointsMaterial`, `shaderMaterial`.
+
+A geometry or material inside `mesh`, `line` or `points` becomes its `geometry` or `material`.
+
+## Props
+
+| Prop | Behavior |
 | --- | --- |
-| `new ThreeJSXRenderer(container?)` | Creates a scene, a perspective camera (75°, positioned at `5, 5, 5` looking at the origin) and a clock. In a browser it also creates a `WebGLRenderer` and appends its canvas to `container`. |
-| `render(element \| elements)` | Clears the scene, rebuilds it from the elements, then renders one frame. |
-| `dispose()` | Removes objects, disposes geometries and materials, disposes the WebGL renderer. |
-| `scene`, `camera`, `renderer`, `clock` | The underlying Three.js objects. |
+| `position`, `scale` | `[x, y, z]` or any `{ x, y, z }` object; `scale` also accepts a number |
+| `rotation` | `[x, y, z]` or any `{ x, y, z, order }` object |
+| `lookAt` | point `[x, y, z]` or `{ x, y, z }` |
+| `args` | constructor arguments of a geometry or material; a change recreates the object and disposes the old one. Throws on objects (`mesh`, `group`…) |
+| `Color` fields (`color`, `emissive`) | `Color.set(value)` |
+| vector and `Euler` fields | a tuple or a structurally compatible object |
+| other fields | assigned; a material gets `needsUpdate = true` only when the field changes its shader program (`transparent`, `side`, textures…), not for uniform values like `opacity` or `roughness` |
+| `ref` | receives the `ThreeNode`; the three object is `node.object` |
 
-Outside a browser no `WebGLRenderer` is created, which keeps the scene usable in tests.
+Prop types are derived from the three classes. Vectors are checked by shape, not `instanceof`, so `@sky-modules/math` and a second copy of `three` both work.
 
-## Elements
+## Disposal
 
-| Element | Props |
-| --- | --- |
-| `scene` | `background`, `fog` (type only) |
-| `camera` | `position`, `rotation`, `lookAt`, `fov`, `aspect`, `near`, `far` (changes the renderer's camera) |
-| `ambientLight` | `color`, `intensity` |
-| `directionalLight` | `color`, `intensity`, `position`, `castShadow` |
-| `pointLight` | `color`, `intensity`, `position`, `distance`, `decay` |
-| `mesh` | `position`, `rotation`, `scale`, `visible`, `castShadow`, `receiveShadow`, `onUpdate` (stored by the renderer, but not called yet: there is no animation loop) |
-| `group` | `position`, `rotation`, `scale`, `visible` |
-| `boxGeometry` | `args`, defaults to `[1, 1, 1]` |
-| `sphereGeometry` | `args`, defaults to `[1, 8, 6]` |
-| `meshBasicMaterial` | `color` |
-| `meshStandardMaterial` | `color`, `metalness` (default `0`), `roughness` (default `1`) |
-
-Vectors are tuples `[x, y, z]`. Geometries and materials are children of a `mesh`. Unknown element types are ignored.
-
-The `JSX.IntrinsicElements` typings for these elements are declared globally when you import the package.
+Geometries and materials are disposed when Solid disposes the owner that created them: a `<Show>` branch, a `<For>` item or the whole `mountThree`. Moving a node does not dispose it.
 
 ## Playground
 

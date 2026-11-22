@@ -62,7 +62,7 @@ renderer.render(scene)
 
 ## JSX
 
-`createCanvasObject(element)` преобразует JSX-элемент в объекты сцены и возвращает `null` для неизвестных тегов.
+`createCanvasObject(element)` преобразует описание элемента `{ type, props }` (`CanvasElement`: тег `rect`/`circle`/`group` или компонент) в объекты сцены и возвращает `null` для неизвестных тегов. Рендерер Solid из `@sky-modules/jsx` здесь не используется.
 
 | Тег | Props |
 | --- | --- |
@@ -74,7 +74,7 @@ renderer.render(scene)
 
 ## Типы
 
-`CanvasRendererParameters`, `Transform2D`, `Geometry`, `Material`, `RectGeometryParameters`, `CircleGeometryParameters`, `BasicMaterialParameters`, `FillStrokeMaterialParameters`, `CanvasJSXNode`.
+`CanvasRendererParameters`, `Transform2D`, `Geometry`, `Material`, `RectGeometryParameters`, `CircleGeometryParameters`, `BasicMaterialParameters`, `FillStrokeMaterialParameters`, `CanvasElement`, `CanvasComponent`, `CanvasJSXNode`.
 
 ## Playground
 

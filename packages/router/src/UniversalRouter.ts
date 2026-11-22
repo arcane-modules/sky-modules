@@ -10,6 +10,13 @@
 import type { JSX } from '@sky-modules/jsx'
 
 /**
+ * Component rendered for a route.
+ *
+ * @global
+ */
+export type RouteComponent = (props: Record<string, unknown>) => JSX.Element
+
+/**
  * Matched route with resolved component and extracted params.
  *
  * @global
@@ -20,7 +27,7 @@ export interface RouteMatch {
     /** Extracted URL parameters from dynamic segments. */
     params: Record<string, string>
     /** Resolved component. */
-    Component: JSX.FC
+    Component: RouteComponent
     /** Whether component is still loading (lazy loaded). */
     isLoading?: boolean
 }
@@ -34,7 +41,7 @@ export interface Route {
     /** Route path pattern (e.g., '/users/:id'). */
     path: string
     /** Component or lazy-loaded component factory. */
-    Component: JSX.FC | (() => Promise<JSX.FC>)
+    Component: RouteComponent | (() => Promise<RouteComponent>)
 }
 
 /**
@@ -43,7 +50,7 @@ export interface Route {
  * @global
  */
 export interface ScreenModule {
-    default: JSX.FC | (() => Promise<JSX.FC>)
+    default: RouteComponent | (() => Promise<RouteComponent>)
 }
 
 /**
@@ -57,7 +64,7 @@ export interface PageRoute {
     /** Route path pattern. */
     path: string
     /** Component or lazy-loaded component. */
-    component: JSX.FC | (() => Promise<JSX.FC>)
+    component: RouteComponent | (() => Promise<RouteComponent>)
     /** Whether route accepts props. */
     props?: boolean
 }
@@ -106,9 +113,9 @@ export class UniversalRouter {
     private routes: Route[] = []
     private currentMatch: RouteMatch | null = null
     private listeners: Set<(match: RouteMatch | null) => void> = new Set()
-    private notFoundComponent: JSX.FC | null = null
-    private loadingComponent: JSX.FC | null = null
-    private loadedComponents = new Map<string, JSX.FC>()
+    private notFoundComponent: RouteComponent | null = null
+    private loadingComponent: RouteComponent | null = null
+    private loadedComponents = new Map<string, RouteComponent>()
     private popstateHandler = (): void => {
         this.handleLocationChange().catch((error) => {
             console.error('[UniversalRouter] Navigation error:', error)
@@ -121,7 +128,7 @@ export class UniversalRouter {
      * @param routes - Route definitions.
      * @param options - Router options (notFound, loading).
      */
-    constructor(routes: Route[], options?: { notFound?: JSX.FC; loading?: JSX.FC }) {
+    constructor(routes: Route[], options?: { notFound?: RouteComponent; loading?: RouteComponent }) {
         this.routes = routes
         this.notFoundComponent = options?.notFound ?? null
         this.loadingComponent = options?.loading ?? null
@@ -216,15 +223,15 @@ export class UniversalRouter {
         return null
     }
 
-    private async loadComponent(route: Route): Promise<JSX.FC> {
+    private async loadComponent(route: Route): Promise<RouteComponent> {
         const cached = this.loadedComponents.get(route.path)
         if (cached) return cached
 
         let isLazyComponent = false
-        let loadPromise: Promise<JSX.FC> | null = null
+        let loadPromise: Promise<RouteComponent> | null = null
 
         try {
-            const result = (route.Component as () => Promise<JSX.FC>)()
+            const result = (route.Component as () => Promise<RouteComponent>)()
             isLazyComponent = result instanceof Promise
 
             if (isLazyComponent) {
@@ -270,7 +277,7 @@ export class UniversalRouter {
             }
         }
 
-        const component = route.Component as JSX.FC
+        const component = route.Component as RouteComponent
         this.loadedComponents.set(route.path, component)
         return component
     }

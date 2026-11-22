@@ -1,78 +1,30 @@
-import type { ElementType } from './element-type'
+import type { Element as SolidElement } from 'solid-js'
+import type { JSXNode } from './nodes'
 
 /**
- * JSX runtime for production builds.
- *
- * Provides the jsx() function used by TypeScript/Babel for JSX transformation
- * in production mode.
- *
- * @module jsx/jsx-runtime
+ * Ref callback receiving the created node.
+ * Declared as a method so engines may narrow the node type (`(node: SpriteNode) => void`).
  */
+export type JSXRef = { bivarianceHack(node: JSXNode): void }['bivarianceHack']
 
-/**
- * Creates a JSX element.
- *
- * Called by the TypeScript/Babel compiler when transforming JSX syntax
- * in production mode.
- *
- * @global
- * @param type - Element type (string for intrinsic elements, function/class for components).
- * @param props - Element properties and attributes.
- * @returns JSX element object.
- *
- * @example
- * ```typescript
- * // JSX: <div className="box">Hello</div>
- * // Transforms to:
- * jsx('div', { className: 'box', children: 'Hello' })
- * ```
- */
-export function jsx(type: ElementType, props: Record<string, unknown>): JSX.Element {
-    return { type, props }
+/** Props accepted by any intrinsic tag; engines narrow them via declaration merging. */
+export interface IntrinsicProps {
+    children?: JSX.Element
+    ref?: JSXRef | JSXRef[]
+    [name: string]: unknown
 }
 
-/**
- * Creates a JSX element with static children.
- *
- * Called by the compiler when children are statically known.
- * Same as jsx() for @sky-modules/jsx since static children are not optimized differently.
- *
- * @global
- */
-export function jsxs(type: ElementType, props: Record<string, unknown>): JSX.Element {
-    return { type, props }
-}
-
-/**
- * Fragment element type.
- *
- * @global
- */
-export const Fragment = 'Fragment'
-
-/**
- * JSX namespace for type checking.
- *
- * @global
- */
+/** JSX types for `jsxImportSource: "@sky-modules/jsx"` with `jsx: "preserve"`. */
 export namespace JSX {
-    /** JSX element structure returned by jsx(). */
-    export interface Element {
-        type: ElementType
-        props: object
-    }
+    export type Element = SolidElement | JSXNode | ArrayElement
 
-    /** Valid children types in JSX. */
-    export type Node = Element | Element[] | string | number | boolean | null | undefined
+    export interface ArrayElement extends Array<Element> {}
 
-    /** Children are passed via `children` prop. */
     export interface ElementChildrenAttribute {
-        children: Record<string, unknown>
+        children: unknown
     }
 
-    /** Any class can be used as JSX element class. */
-    export type ElementClass = object
-
-    /** Intrinsic elements (lowercase tags). */
-    export interface IntrinsicElements extends Record<string, Record<string, unknown>> {}
+    export interface IntrinsicElements {
+        [tag: string]: IntrinsicProps
+    }
 }

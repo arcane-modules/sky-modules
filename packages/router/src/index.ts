@@ -13,6 +13,7 @@ export {
 
 export type {
     Route,
+    RouteComponent,
     RouteMatch,
     ScreenModule,
     PageRoute,
